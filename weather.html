@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Weather App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a, #1d4ed8);
+            color: #e5e7eb;
+            padding: 16px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 24px;
+            padding: 24px 20px 20px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(12px);
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .app-subtitle {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            margin-top: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid #4b5563;
+            background: #020617;
+            color: #e5e7eb;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #6b7280;
+        }
+
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+
+        .search-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0 16px;
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            background: #1d4ed8;
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .search-btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .status {
+            min-height: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            color: #9ca3af;
+        }
+
+        .status.error {
+            color: #fecaca;
+        }
+
+        .card {
+            margin-top: 8px;
+            border-radius: 20px;
+            padding: 16px 14px;
+            background: radial-gradient(circle at top left, #1d4ed8, #020617);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .location-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .location-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .location-country {
+            font-size: 0.8rem;
+            color: #cbd5f5;
+            opacity: 0.85;
+        }
+
+        .local-time {
+            font-size: 0.8rem;
+            color: #e5e7eb;
+            opacity: 0.8;
+        }
+
+        .main-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+            gap: 12px;
+        }
+
+        .temp-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .temp-value {
+            font-size: 2.6rem;
+            font-weight: 700;
+        }
+
+        .temp-unit {
+            font-size: 1rem;
+            color: #d1d5db;
+        }
+
+        .condition {
+            font-size: 0.9rem;
+            color: #e5e7eb;
+            margin-top: 4px;
+        }
+
+        .icon-wrap img {
+            width: 64px;
+            height: 64px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+            font-size: 0.8rem;
+        }
+
+        .detail-item {
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 14px;
+            padding: 8px 10px;
+            border: 1px solid rgba(55, 65, 81, 0.8);
+        }
+
+        .detail-label {
+            color: #9ca3af;
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        @media (max-width: 480px) {
+            .app {
+                padding: 20px 16px 18px;
+            }
+
+            .temp-value {
+                font-size: 2.2rem;
+            }
+
+            .icon-wrap img {
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="app-header">
+            <div class="app-title">Weather Now</div>
+            <div class="app-subtitle">Get live weather for any city</div>
+        </header>
+
+        <div class="search-bar">
+            <input id="location-input" class="search-input" type="text"
+                placeholder="Enter city or place (e.g. London, Mumbai)" />
+            <button id="search-btn" class="search-btn">Search</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="weather-card" class="card" style="display: none;">
+            <div class="location-row">
+                <div>
+                    <div id="location-name" class="location-name"></div>
+                    <div id="location-country" class="location-country"></div>
+                </div>
+                <div id="local-time" class="local-time"></div>
+            </div>
+
+            <div class="main-row">
+                <div>
+                    <div class="temp-main">
+                        <span id="temp-value" class="temp-value"></span>
+                        <span class="temp-unit">°C</span>
+                    </div>
+                    <div id="condition-text" class="condition"></div>
+                </div>
+                <div class="icon-wrap">
+                    <img id="condition-icon" alt="Weather icon" />
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Feels like</div>
+                    <div id="feelslike" class="detail-value"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Humidity</div>
+                    <div id="humidity" class="detail-value"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Wind</div>
+                    <div id="wind" class="detail-value"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Air Quality (PM2.5)</div>
+                    <div id="aqi" class="detail-value"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Use your WeatherAPI key
+        const API_KEY = "7568de512a3c4a85a5c53731252911";
+        const BASE_URL = "https://api.weatherapi.com/v1/current.json";
+
+        const locationInput = document.getElementById("location-input");
+        const searchBtn = document.getElementById("search-btn");
+        const statusEl = document.getElementById("status");
+        const cardEl = document.getElementById("weather-card");
+
+        const locationNameEl = document.getElementById("location-name");
+        const locationCountryEl = document.getElementById("location-country");
+        const localTimeEl = document.getElementById("local-time");
+        const tempValueEl = document.getElementById("temp-value");
+        const conditionTextEl = document.getElementById("condition-text");
+        const conditionIconEl = document.getElementById("condition-icon");
+        const feelslikeEl = document.getElementById("feelslike");
+        const humidityEl = document.getElementById("humidity");
+        const windEl = document.getElementById("wind");
+        const aqiEl = document.getElementById("aqi");
+
+        async function fetchWeather(location) {
+            if (!location) {
+                showError("Please enter a location.");
+                return;
+            }
+
+            setStatus(`Loading weather for "${location}"...`);
+            cardEl.style.display = "none";
+
+            try {
+                const url =
+                    `${BASE_URL}?key=${encodeURIComponent(API_KEY)}` +
+                    `&q=${encodeURIComponent(location)}&aqi=yes`;
+
+                const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error("Location not found");
+                }
+
+                const data = await res.json();
+                renderWeather(data);
+                setStatus(""); // clear status
+            } catch (err) {
+                console.error(err);
+                showError("Could not fetch weather. Check the location name.");
+            }
+        }
+
+        function renderWeather(data) {
+            const loc = data.location;
+            const cur = data.current;
+
+            locationNameEl.textContent = `${loc.name}`;
+            locationCountryEl.textContent = `${loc.region ? loc.region + ", " : ""}${loc.country}`;
+            localTimeEl.textContent = `Local time: ${loc.localtime}`;
+
+            tempValueEl.textContent = Math.round(cur.temp_c);
+            conditionTextEl.textContent = cur.condition.text;
+
+            // WeatherAPI icon comes like //cdn.weatherapi.com/...
+            const iconUrl = cur.condition.icon.startsWith("http")
+                ? cur.condition.icon
+                : "https:" + cur.condition.icon;
+            conditionIconEl.src = iconUrl;
+
+            feelslikeEl.textContent = `${Math.round(cur.feelslike_c)} °C`;
+            humidityEl.textContent = `${cur.humidity} %`;
+            windEl.textContent = `${cur.wind_kph} km/h ${cur.wind_dir}`;
+
+            if (cur.air_quality && typeof cur.air_quality["pm2_5"] !== "undefined") {
+                aqiEl.textContent = `${cur.air_quality["pm2_5"].toFixed(1)} µg/m³`;
+            } else {
+                aqiEl.textContent = "N/A";
+            }
+
+            cardEl.style.display = "block";
+        }
+
+        function setStatus(message) {
+            statusEl.textContent = message;
+            statusEl.classList.remove("error");
+        }
+
+        function showError(message) {
+            statusEl.textContent = message;
+            statusEl.classList.add("error");
+            cardEl.style.display = "none";
+        }
+
+        // Event listeners
+        searchBtn.addEventListener("click", () => {
+            fetchWeather(locationInput.value.trim());
+        });
+
+        locationInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                fetchWeather(locationInput.value.trim());
+            }
+        });
+
+        // Optional: load a default city on start
+        fetchWeather("London");
+    </script>
+</body>
+
+</html>
